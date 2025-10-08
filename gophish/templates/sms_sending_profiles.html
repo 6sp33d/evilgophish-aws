@@ -57,7 +57,14 @@
                         <label class="control-label" for="secret_key">AWS Secret Key:</label>
                         <input type="password" class="form-control" placeholder="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" id="secret_key" required />
                         <label class="control-label" for="region">AWS Region:</label>
-                        <input type="text" class="form-control" placeholder="us-east-1" id="region" required />
+                        <select class="form-control" id="region" required>
+                            <option value="">Select AWS Region</option>
+                            <option value="us-east-1">us-east-1</option>
+                            <option value="us-east-2">us-east-2</option>
+                            <option value="us-west-1">us-west-1</option>
+                            <option value="us-west-2">us-west-2</option>
+                            <option value="ca-central-1">ca-central-1</option>
+                        </select>
                     </div>                   
                 </form>
             </div>
