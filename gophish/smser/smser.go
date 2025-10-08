@@ -4,13 +4,12 @@ import (
 	"context"
 
 	log "github.com/gophish/gophish/logger"
-	"github.com/twilio/twilio-go"
-	openapi "github.com/twilio/twilio-go/rest/api/v2010"
+	"github.com/aws/aws-sdk-go-v2/service/sns"
 )
 
-type TwilioMessage struct {
-	Client twilio.RestClient
-	Params openapi.CreateMessageParams
+type SNSMessage struct {
+	Client *sns.Client
+	Params sns.PublishInput
 }
 
 // Smser is an interface that defines an object used to queue and
@@ -24,7 +23,7 @@ type Smser interface {
 type Sms interface {
 	Error(err error) error
 	Success() error
-	Generate(msg *TwilioMessage) error
+	Generate(msg *SNSMessage) error
 	Backoff(err error) error
 }
 
@@ -65,28 +64,34 @@ func (sw *SmsWorker) Queue(sms []Sms) {
 // If the context is cancelled before all of the sms are sent,
 // sendSms just returns and does not modify those sms's.
 func sendSms(ctx context.Context, sms []Sms) {
+	log.Infof("sendSms called with %d SMS messages", len(sms))
 	for _, s := range sms {
 		select {
 		case <-ctx.Done():
+			log.Info("Context cancelled, stopping SMS sending")
 			return
 		default:
 			break
 		}
 		// Generate the message
-		message := &TwilioMessage{}
+		log.Info("Generating SNS message")
+		message := &SNSMessage{}
 		err := s.Generate(message)
 		if err != nil {
-			log.Warn(err)
+			log.Warnf("Error generating message: %v", err)
 			s.Error(err)
 			continue
 		}
+		log.Infof("Message generated successfully, about to publish to SNS")
 		// Send the message
-		_, err = message.Client.Api.CreateMessage(&message.Params)
+		result, err := message.Client.Publish(ctx, &message.Params)
 		if err != nil {
-			log.Warn(err)
+			log.Warnf("Error publishing to SNS: %v", err)
 			s.Backoff(err)
 			continue
 		}
+		log.Infof("SMS sent successfully to AWS SNS, MessageId: %v", result.MessageId)
 		s.Success()
 	}
+	log.Info("sendSms completed")
 }

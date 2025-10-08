@@ -50,12 +50,14 @@
                         <input type="text" class="form-control" placeholder="Profile name" id="name" autofocus />
                         <label class="control-label" for="username">SMS From:</label>
                         <input type="text" class="form-control" placeholder="Sending SMS number (e.g. +12025550147)" id="sms_from" />
-                        <label class="control-label" for="from">Twilio Account SID: <i class="fa fa-question-circle"
-                                data-toggle="tooltip" data-placement="right" title="Set this to your Twilio Account SID."></i></label>
-                        <input type="text" class="form-control" placeholder="ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" id="account_sid"
+                        <label class="control-label" for="access_key_id">AWS Access Key ID: <i class="fa fa-question-circle"
+                                data-toggle="tooltip" data-placement="right" title="Set this to your AWS Access Key ID."></i></label>
+                        <input type="text" class="form-control" placeholder="AKIAIOSFODNN7EXAMPLE" id="access_key_id"
                             required />
-                        <label class="control-label" for="host">Twilio Auth Token:</label>
-                        <input type="password" class="form-control" placeholder="YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY" id="auth_token" required />
+                        <label class="control-label" for="secret_key">AWS Secret Key:</label>
+                        <input type="password" class="form-control" placeholder="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" id="secret_key" required />
+                        <label class="control-label" for="region">AWS Region:</label>
+                        <input type="text" class="form-control" placeholder="us-east-1" id="region" required />
                     </div>                   
                 </form>
             </div>

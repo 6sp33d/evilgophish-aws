@@ -645,19 +645,34 @@ func PostSMSCampaign(c *Campaign, uid int64) error {
 				Processing: processing,
 				Target:     t.Email,
 			}
+			log.WithFields(logrus.Fields{
+				"target": t.Email,
+				"r_id": r.RId,
+			}).Info("About to save SMS log")
 			err = tx.Save(s).Error
 			if err != nil {
 				log.WithFields(logrus.Fields{
-					"email": t.Email,
-				}).Errorf("error creating maillog entry: %v", err)
+					"target": t.Email,
+				}).Errorf("error creating SMS log entry: %v", err)
 				tx.Rollback()
 				return err
 			}
+			log.WithFields(logrus.Fields{
+				"target": t.Email,
+				"sms_log_id": s.Id,
+			}).Info("Successfully saved SMS log")
 
 			recipientIndex++
 		}
 	}
-	return tx.Commit().Error
+	log.Info("About to commit transaction")
+	err = tx.Commit().Error
+	if err != nil {
+		log.Errorf("Transaction commit failed: %v", err)
+		return err
+	}
+	log.Info("Transaction committed successfully")
+	return nil
 }
 
 // PostCampaign inserts a campaign and all associated records into the database.

@@ -10,8 +10,9 @@ function save(idx) {
         })
     })
     profile.name = $("#name").val()
-    profile.account_sid = $("#account_sid").val()
-    profile.auth_token = $("#auth_token").val()
+    profile.access_key_id = $("#access_key_id").val()
+    profile.secret_key = $("#secret_key").val()
+    profile.region = $("#region").val()
     profile.sms_from = $("#sms_from").val()
 
     if (idx != -1) {
@@ -42,8 +43,9 @@ function save(idx) {
 function dismiss() {
     $("#modal\\.flashes").empty()
     $("#name").val("")
-    $("#account_sid").val("")
-    $("#auth_token").val("")
+    $("#access_key_id").val("")
+    $("#secret_key").val("")
+    $("#region").val("")
     $("#sms_from").val("")
     $("#headersTable").dataTable().DataTable().clear().draw()
     $("#modal").modal('hide')
@@ -107,8 +109,9 @@ function edit(idx) {
         $("#profileModalLabel").text("Edit Sending Profile")
         profile = profiles[idx]
         $("#name").val(profile.name)
-        $("#account_sid").val(profile.account_sid)
-        $("#auth_token").val(profile.token)
+        $("#access_key_id").val(profile.access_key_id)
+        $("#secret_key").val(profile.secret_key)
+        $("#region").val(profile.region)
         $("#sms_from").val(profile.sms_from)
     } else {
         $("#profileModalLabel").text("New Sending Profile")
@@ -122,8 +125,9 @@ function copy(idx) {
     var profile = {}
     profile = profiles[idx]
     $("#name").val("Copy of " + profile.name)
-    $("#account_sid").val(profile.account_sid)
-    $("#auth_token").val(profile.auth_token)
+    $("#access_key_id").val(profile.access_key_id)
+    $("#secret_key").val(profile.secret_key)
+    $("#region").val(profile.region)
     $("#sms_from").val(profile.sms_from)
 }
 

@@ -9,25 +9,29 @@ import (
 
 // SMS contains the attributes needed to handle the sending of campaign SMS messages
 type SMS struct {
-	Id               int64     `json:"id" gorm:"column:id; primary_key:yes"`
-	UserId           int64     `json:"-" gorm:"column:user_id"`
-	Name             string    `json:"name"`
-	TwilioAccountSid string    `json:"account_sid"`
-	TwilioAuthToken  string    `json:"auth_token"`
-	SMSFrom          string    `json:"sms_from"`
-	ModifiedDate     time.Time `json:"modified_date"`
+	Id              int64     `json:"id" gorm:"column:id; primary_key:yes"`
+	UserId          int64     `json:"-" gorm:"column:user_id"`
+	Name            string    `json:"name"`
+	AWSAccessKeyId  string    `json:"access_key_id"`
+	AWSSecretKey    string    `json:"secret_key"`
+	AWSRegion       string    `json:"region"`
+	SMSFrom         string    `json:"sms_from"`
+	ModifiedDate    time.Time `json:"modified_date"`
 }
 
-var ErrAccountSidNotSpecified = errors.New("No Twilio Account SID Specified")
-var ErrAuthTokenNotSpecified = errors.New("No Twilio Auth Token Specified")
+var ErrAccessKeyIdNotSpecified = errors.New("No AWS Access Key ID Specified")
+var ErrSecretKeyNotSpecified = errors.New("No AWS Secret Key Specified")
+var ErrRegionNotSpecified = errors.New("No AWS Region Specified")
 
 func (s *SMS) Validate() error {
 	var err error
 
-	if s.TwilioAccountSid == "" {
-		err = ErrAccountSidNotSpecified
-	} else if s.TwilioAuthToken == "" {
-		err = ErrAuthTokenNotSpecified
+	if s.AWSAccessKeyId == "" {
+		err = ErrAccessKeyIdNotSpecified
+	} else if s.AWSSecretKey == "" {
+		err = ErrSecretKeyNotSpecified
+	} else if s.AWSRegion == "" {
+		err = ErrRegionNotSpecified
 	}
 
 	return err

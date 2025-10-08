@@ -1,29 +1,37 @@
 package models
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"time"
 
 	log "github.com/gophish/gophish/logger"
 	"github.com/gophish/gophish/smser"
-	"github.com/twilio/twilio-go"
-	openapi "github.com/twilio/twilio-go/rest/api/v2010"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/sns"
 )
 
 // SmsLog is a struct that holds information about an sms that is to be
 // sent out.
 type SmsLog struct {
-	Id          int64     `json:"-"`
-	UserId      int64     `json:"-"`
-	CampaignId  int64     `json:"campaign_id"`
-	RId         string    `json:"id"`
-	SendDate    time.Time `json:"send_date"`
-	SendAttempt int       `json:"send_attempt"`
-	Processing  bool      `json:"-"`
-	Target      string    `json:"target"`
+	Id          int64     `json:"-" gorm:"column:id; primary_key:yes"`
+	UserId      int64     `json:"-" gorm:"column:user_id"`
+	CampaignId  int64     `json:"campaign_id" gorm:"column:campaign_id"`
+	RId         string    `json:"id" gorm:"column:r_id"`
+	SendDate    time.Time `json:"send_date" gorm:"column:send_date"`
+	SendAttempt int       `json:"send_attempt" gorm:"column:send_attempt"`
+	Processing  bool      `json:"-" gorm:"column:processing"`
+	Target      string    `json:"target" gorm:"column:target"`
 
 	cachedCampaign *Campaign
+}
+
+// TableName specifies the database tablename for Gorm to use
+func (s SmsLog) TableName() string {
+	return "sms_logs"
 }
 
 // GenerateSmsLog creates a new smslog for the given campaign and
@@ -123,9 +131,9 @@ func (s *SmsLog) CacheCampaign(campaign *Campaign) error {
 	return nil
 }
 
-// Generate fills in the details of a smser.TwilioMessage instance with
+// Generate fills in the details of a smser.SNSMessage instance with
 // information from the campaign and recipient listed in the smslog.
-func (s *SmsLog) Generate(msg *smser.TwilioMessage) error {
+func (s *SmsLog) Generate(msg *smser.SNSMessage) error {
 	r, err := GetResult(s.RId)
 	if err != nil {
 		return err
@@ -151,11 +159,32 @@ func (s *SmsLog) Generate(msg *smser.TwilioMessage) error {
 			log.Warn(err)
 		}
 
-		msg.Client = *twilio.NewRestClientWithParams(twilio.ClientParams{Username: c.SMS.TwilioAccountSid, Password: c.SMS.TwilioAuthToken})
-		msg.Params = openapi.CreateMessageParams{
-			To:   &s.Target,
-			From: &c.SMS.SMSFrom,
-			Body: &text,
+		// Create AWS SNS client
+		cfg, err := config.LoadDefaultConfig(context.Background(),
+			config.WithRegion(c.SMS.AWSRegion),
+			config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(c.SMS.AWSAccessKeyId, c.SMS.AWSSecretKey, "")),
+		)
+		if err != nil {
+			return fmt.Errorf("failed to load AWS config: %v", err)
+		}
+
+		msg.Client = sns.NewFromConfig(cfg)
+		
+		// Format phone number for AWS SNS (E.164 format)
+		phoneNumber := s.Target
+		if len(phoneNumber) == 10 && phoneNumber[0] != '+' {
+			// Assume US number if 10 digits without country code
+			phoneNumber = "+1" + phoneNumber
+		} else if len(phoneNumber) == 11 && phoneNumber[0] == '1' {
+			// Add + if missing for US numbers
+			phoneNumber = "+" + phoneNumber
+		}
+		
+		log.Infof("Sending SMS to phone number: %s (formatted from: %s)", phoneNumber, s.Target)
+		
+		msg.Params = sns.PublishInput{
+			Message:     aws.String(text),
+			PhoneNumber: aws.String(phoneNumber),
 		}
 	} else {
 		return fmt.Errorf("No text template specified")
