@@ -1,5 +1,49 @@
 var profiles = []
 
+// Function to fetch phone numbers from AWS
+function fetchPhoneNumbers() {
+    var accessKeyId = $("#access_key_id").val()
+    var secretKey = $("#secret_key").val()
+    var region = $("#region").val()
+    
+    if (!accessKeyId || !secretKey || !region) {
+        return
+    }
+    
+    // Show loading state
+    $("#sms_from").html('<option value="">Loading phone numbers...</option>').prop('disabled', true)
+    
+    // Make API call to fetch phone numbers
+    $.ajax({
+        url: '/api/sms/phone-numbers',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            access_key_id: accessKeyId,
+            secret_key: secretKey,
+            region: region
+        }),
+        success: function(phoneNumbers) {
+            $("#sms_from").html('<option value="">Select phone number</option>')
+            if (phoneNumbers && phoneNumbers.length > 0) {
+                $.each(phoneNumbers, function(i, phone) {
+                    $("#sms_from").append('<option value="' + phone.number + '">' + phone.number + ' (' + phone.status + ')</option>')
+                })
+                $("#sms_from").prop('disabled', false)
+            } else {
+                $("#sms_from").html('<option value="">No phone numbers found</option>')
+            }
+        },
+        error: function(xhr) {
+            var message = "Failed to load phone numbers"
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                message = xhr.responseJSON.message
+            }
+            $("#sms_from").html('<option value="">' + message + '</option>')
+        }
+    })
+}
+
 // Save attempts to POST to /smtp/
 function save(idx) {
     var profile = {}
@@ -45,8 +89,8 @@ function dismiss() {
     $("#name").val("")
     $("#access_key_id").val("")
     $("#secret_key").val("")
-    $("#region").val("")
-    $("#sms_from").val("")
+    $("#region").val("us-east-1")
+    $("#sms_from").html('<option value="">Enter AWS credentials to load phone numbers</option>').prop('disabled', true)
     $("#headersTable").dataTable().DataTable().clear().draw()
     $("#modal").modal('hide')
 }
@@ -112,9 +156,19 @@ function edit(idx) {
         $("#access_key_id").val(profile.access_key_id)
         $("#secret_key").val(profile.secret_key)
         $("#region").val(profile.region)
-        $("#sms_from").val(profile.sms_from)
+        // Trigger phone number fetch for existing profiles
+        if (profile.access_key_id && profile.secret_key) {
+            fetchPhoneNumbers()
+            // Set the selected phone number after a delay to allow for API call
+            setTimeout(function() {
+                $("#sms_from").val(profile.sms_from)
+            }, 2000)
+        } else {
+            $("#sms_from").html('<option value="">Enter AWS credentials to load phone numbers</option>').prop('disabled', true)
+        }
     } else {
         $("#profileModalLabel").text("New Sending Profile")
+        $("#sms_from").html('<option value="">Enter AWS credentials to load phone numbers</option>').prop('disabled', true)
     }
 }
 
@@ -128,7 +182,16 @@ function copy(idx) {
     $("#access_key_id").val(profile.access_key_id)
     $("#secret_key").val(profile.secret_key)
     $("#region").val(profile.region)
-    $("#sms_from").val(profile.sms_from)
+    // Trigger phone number fetch for copied profiles
+    if (profile.access_key_id && profile.secret_key) {
+        fetchPhoneNumbers()
+        // Set the selected phone number after a delay to allow for API call
+        setTimeout(function() {
+            $("#sms_from").val(profile.sms_from)
+        }, 2000)
+    } else {
+        $("#sms_from").html('<option value="">Enter AWS credentials to load phone numbers</option>').prop('disabled', true)
+    }
 }
 
 function load() {
@@ -277,5 +340,13 @@ $(document).ready(function () {
             .remove()
             .draw();
     });
+    
+    // Add event listeners for credential changes
+    $("#access_key_id, #secret_key").on('input', function() {
+        // Debounce the API call
+        clearTimeout(window.phoneNumberTimeout)
+        window.phoneNumberTimeout = setTimeout(fetchPhoneNumbers, 1000)
+    });
+    
     load()
 })

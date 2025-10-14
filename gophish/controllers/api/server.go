@@ -89,6 +89,7 @@ func (as *Server) registerRoutes() {
 	router.HandleFunc("/smtp/{id:[0-9]+}", as.SendingProfile)
 	router.HandleFunc("/sms/", as.SMSProfiles)
 	router.HandleFunc("/sms/{id:[0-9]+}", as.SMSProfile)
+	router.HandleFunc("/sms/phone-numbers", as.SMSPhoneNumbers)
 	router.HandleFunc("/users/", mid.Use(as.Users, mid.RequirePermission(models.PermissionModifySystem)))
 	router.HandleFunc("/users/{id:[0-9]+}", mid.Use(as.User))
 	router.HandleFunc("/util/send_test_email", as.SendTestEmail)

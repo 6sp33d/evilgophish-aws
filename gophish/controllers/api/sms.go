@@ -94,3 +94,55 @@ func (as *Server) SMSProfile(w http.ResponseWriter, r *http.Request) {
 		JSONResponse(w, s, http.StatusOK)
 	}
 }
+
+// PhoneNumberRequest represents the request to fetch phone numbers
+type PhoneNumberRequest struct {
+	AccessKeyID string `json:"access_key_id"`
+	SecretKey   string `json:"secret_key"`
+	Region      string `json:"region"`
+}
+
+// PhoneNumber represents a phone number from AWS
+type PhoneNumber struct {
+	Number string `json:"number"`
+	Status string `json:"status"`
+}
+
+// SMSPhoneNumbers handles requests for fetching phone numbers from AWS
+func (as *Server) SMSPhoneNumbers(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		JSONResponse(w, models.Response{Success: false, Message: "Method not allowed"}, http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req PhoneNumberRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		JSONResponse(w, models.Response{Success: false, Message: "Invalid request"}, http.StatusBadRequest)
+		return
+	}
+
+	// Validate required fields
+	if req.AccessKeyID == "" || req.SecretKey == "" || req.Region == "" {
+		JSONResponse(w, models.Response{Success: false, Message: "Missing required fields"}, http.StatusBadRequest)
+		return
+	}
+
+	// TODO: Implement actual AWS API integration
+	// For now, we'll return a mock response
+	// In a real implementation, you would:
+	// 1. Create AWS config with provided credentials
+	// 2. Use AWS Pinpoint or SNS service to list phone numbers
+	// 3. Parse the response and extract phone numbers
+	
+	log.Infof("Fetching phone numbers for region: %s", req.Region)
+	
+	// Mock phone numbers - replace with actual AWS API call
+	phoneNumbers := []PhoneNumber{
+		{Number: "+1234567890", Status: "ACTIVE"},
+		{Number: "+1987654321", Status: "ACTIVE"},
+		{Number: "+1555123456", Status: "ACTIVE"},
+	}
+
+	JSONResponse(w, phoneNumbers, http.StatusOK)
+}
