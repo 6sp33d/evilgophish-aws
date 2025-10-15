@@ -48,26 +48,23 @@
                     <div class="form-group">
                         <label class="control-label" for="name">Name:</label>
                         <input type="text" class="form-control" placeholder="Profile name" id="name" autofocus />
-                        
                         <label class="control-label" for="access_key_id">AWS Access Key ID: <i class="fa fa-question-circle"
                                 data-toggle="tooltip" data-placement="right" title="Set this to your AWS Access Key ID."></i></label>
                         <input type="text" class="form-control" placeholder="AKIAIOSFODNN7EXAMPLE" id="access_key_id"
                             required />
-                            
                         <label class="control-label" for="secret_key">AWS Secret Key:</label>
                         <input type="password" class="form-control" placeholder="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" id="secret_key" required />
-                        
                         <label class="control-label" for="region">AWS Region:</label>
-                        <select class="form-control" id="region" disabled>
+                        <select class="form-control" id="region" required disabled>
                             <option value="us-east-1" selected>us-east-1</option>
                         </select>
-                        <small class="help-block">Region is fixed to us-east-1 for End User Messaging SMS</small>
-                        
                         <label class="control-label" for="sms_from">SMS From Phone Number:</label>
-                        <select class="form-control" id="sms_from" required disabled>
-                            <option value="">Enter AWS credentials to load phone numbers</option>
+                        <select class="form-control" id="sms_from" required>
+                            <option value="">Select Phone Number (Enter AWS credentials first)</option>
                         </select>
-                        <small class="help-block">Phone numbers will be loaded from your AWS End User Messaging SMS account</small>
+                        <div id="phone_loading" style="display: none;">
+                            <i class="fa fa-spinner fa-spin"></i> Loading phone numbers...
+                        </div>
                     </div>                   
                 </form>
             </div>
