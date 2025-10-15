@@ -123,12 +123,27 @@ func (as *Server) SMSPhoneNumbers(w http.ResponseWriter, r *http.Request) {
 	var req PhoneNumbersRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		log.Errorf("Failed to decode phone numbers request: %v", err)
 		JSONResponse(w, PhoneNumbersResponse{Success: false, Message: "Invalid request"}, http.StatusBadRequest)
 		return
 	}
 
+	// Log the received request for debugging
+	secretKeyMasked := req.SecretKey
+	if len(secretKeyMasked) > 4 {
+		secretKeyMasked = secretKeyMasked[:4] + "***"
+	}
+	log.Infof("Phone numbers request received: AccessKeyID=%s, SecretKey=%s, Region=%s", 
+		req.AccessKeyID, 
+		secretKeyMasked, 
+		req.Region)
+
 	// Validate required fields
 	if req.AccessKeyID == "" || req.SecretKey == "" || req.Region == "" {
+		log.Errorf("Missing required fields: AccessKeyID=%s, SecretKey=%s, Region=%s", 
+			req.AccessKeyID, 
+			req.SecretKey, 
+			req.Region)
 		JSONResponse(w, PhoneNumbersResponse{Success: false, Message: "Missing required fields"}, http.StatusBadRequest)
 		return
 	}
