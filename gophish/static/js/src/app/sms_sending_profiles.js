@@ -7,43 +7,44 @@ function fetchPhoneNumbers() {
     var region = $("#region").val()
     
     if (!accessKeyId || !secretKey || !region) {
+        $("#sms_from").prop('disabled', true)
+        $("#sms_from").html('<option value="">Enter AWS credentials to load phone numbers</option>')
         return
     }
     
     $("#phone_loading").show()
+    $("#sms_from").prop('disabled', true)
     $("#sms_from").html('<option value="">Loading phone numbers...</option>')
     
-    $.ajax({
-        url: '/api/sms/phone-numbers',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
-            access_key_id: accessKeyId,
-            secret_key: secretKey,
-            region: region
-        }),
-        success: function(response) {
-            $("#phone_loading").hide()
-            if (response.success && response.phone_numbers) {
-                var options = '<option value="">Select Phone Number</option>'
-                response.phone_numbers.forEach(function(phoneNumber) {
-                    options += '<option value="' + phoneNumber + '">' + phoneNumber + '</option>'
-                })
-                $("#sms_from").html(options)
-            } else {
-                $("#sms_from").html('<option value="">Error loading phone numbers</option>')
-                modalError(response.message || "Failed to load phone numbers")
-            }
-        },
-        error: function(xhr) {
-            $("#phone_loading").hide()
+    api.SMS.phoneNumbers({
+        access_key_id: accessKeyId,
+        secret_key: secretKey,
+        region: region
+    })
+    .success(function(response) {
+        $("#phone_loading").hide()
+        if (response.success && response.phone_numbers) {
+            var options = '<option value="">Select Phone Number</option>'
+            response.phone_numbers.forEach(function(phoneNumber) {
+                options += '<option value="' + phoneNumber + '">' + phoneNumber + '</option>'
+            })
+            $("#sms_from").html(options)
+            $("#sms_from").prop('disabled', false)
+        } else {
             $("#sms_from").html('<option value="">Error loading phone numbers</option>')
-            var errorMsg = "Failed to load phone numbers"
-            if (xhr.responseJSON && xhr.responseJSON.message) {
-                errorMsg = xhr.responseJSON.message
-            }
-            modalError(errorMsg)
+            $("#sms_from").prop('disabled', true)
+            modalError(response.message || "Failed to load phone numbers")
         }
+    })
+    .error(function(xhr) {
+        $("#phone_loading").hide()
+        $("#sms_from").html('<option value="">Error loading phone numbers</option>')
+        $("#sms_from").prop('disabled', true)
+        var errorMsg = "Failed to load phone numbers"
+        if (xhr.responseJSON && xhr.responseJSON.message) {
+            errorMsg = xhr.responseJSON.message
+        }
+        modalError(errorMsg)
     })
 }
 
@@ -94,7 +95,8 @@ function dismiss() {
     $("#secret_key").val("")
     $("#region").val("us-east-1")
     $("#sms_from").val("")
-    $("#sms_from").html('<option value="">Select Phone Number (Enter AWS credentials first)</option>')
+    $("#sms_from").html('<option value="">Enter AWS credentials to load phone numbers</option>')
+    $("#sms_from").prop('disabled', true)
     $("#phone_loading").hide()
     $("#headersTable").dataTable().DataTable().clear().draw()
     $("#modal").modal('hide')
@@ -165,14 +167,17 @@ function edit(idx) {
         if (profile.sms_from) {
             $("#sms_from").html('<option value="' + profile.sms_from + '">' + profile.sms_from + '</option>')
             $("#sms_from").val(profile.sms_from)
+            $("#sms_from").prop('disabled', false)
         } else {
-            $("#sms_from").html('<option value="">Select Phone Number (Enter AWS credentials first)</option>')
+            $("#sms_from").html('<option value="">Enter AWS credentials to load phone numbers</option>')
+            $("#sms_from").prop('disabled', true)
         }
     } else {
         $("#profileModalLabel").text("New Sending Profile")
         // Reset to default state for new profile
         $("#region").val("us-east-1")
-        $("#sms_from").html('<option value="">Select Phone Number (Enter AWS credentials first)</option>')
+        $("#sms_from").html('<option value="">Enter AWS credentials to load phone numbers</option>')
+        $("#sms_from").prop('disabled', true)
     }
 }
 
@@ -190,8 +195,10 @@ function copy(idx) {
     if (profile.sms_from) {
         $("#sms_from").html('<option value="' + profile.sms_from + '">' + profile.sms_from + '</option>')
         $("#sms_from").val(profile.sms_from)
+        $("#sms_from").prop('disabled', false)
     } else {
-        $("#sms_from").html('<option value="">Select Phone Number (Enter AWS credentials first)</option>')
+        $("#sms_from").html('<option value="">Enter AWS credentials to load phone numbers</option>')
+        $("#sms_from").prop('disabled', true)
     }
 }
 
@@ -349,6 +356,17 @@ $(document).ready(function () {
         window.phoneNumberTimeout = setTimeout(function() {
             fetchPhoneNumbers();
         }, 1000); // Wait 1 second after user stops typing
+    });
+    
+    // Also trigger on paste events
+    $("#access_key_id, #secret_key").on('paste', function() {
+        var self = this;
+        setTimeout(function() {
+            clearTimeout(window.phoneNumberTimeout);
+            window.phoneNumberTimeout = setTimeout(function() {
+                fetchPhoneNumbers();
+            }, 1000);
+        }, 100);
     });
     
     load()

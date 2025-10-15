@@ -203,6 +203,9 @@ var api = {
         },
         post: function (sms) {
             return query("/sms/", "POST", sms, false)
+        },
+        phoneNumbers: function (credentials) {
+            return query("/sms/phone-numbers", "POST", credentials, false)
         }
     },
     SMSId: {
