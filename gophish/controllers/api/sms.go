@@ -167,8 +167,13 @@ func (as *Server) SMSPhoneNumbers(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		
+		// Log the raw AWS response for debugging
+		log.Infof("Raw AWS SNS ListOriginationNumbers response: %+v", page)
+		
 		for _, phoneNumberInfo := range page.PhoneNumbers {
-			if phoneNumberInfo.PhoneNumber != nil {
+			log.Infof("Phone number info: %+v", phoneNumberInfo)
+			// Only include phone numbers with "Active" status
+			if phoneNumberInfo.PhoneNumber != nil && phoneNumberInfo.Status != nil && *phoneNumberInfo.Status == "Active" {
 				phoneNumbers = append(phoneNumbers, *phoneNumberInfo.PhoneNumber)
 			}
 		}
