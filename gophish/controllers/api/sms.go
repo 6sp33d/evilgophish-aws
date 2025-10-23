@@ -128,22 +128,9 @@ func (as *Server) SMSPhoneNumbers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Log the received request for debugging
-	secretKeyMasked := req.SecretKey
-	if len(secretKeyMasked) > 4 {
-		secretKeyMasked = secretKeyMasked[:4] + "***"
-	}
-	log.Infof("Phone numbers request received: AccessKeyID=%s, SecretKey=%s, Region=%s", 
-		req.AccessKeyID, 
-		secretKeyMasked, 
-		req.Region)
-
 	// Validate required fields
 	if req.AccessKeyID == "" || req.SecretKey == "" || req.Region == "" {
-		log.Errorf("Missing required fields: AccessKeyID=%s, SecretKey=%s, Region=%s", 
-			req.AccessKeyID, 
-			req.SecretKey, 
-			req.Region)
+		log.Errorf("Missing required fields for phone number request")
 		JSONResponse(w, PhoneNumbersResponse{Success: false, Message: "Missing required fields"}, http.StatusBadRequest)
 		return
 	}
@@ -188,7 +175,12 @@ func (as *Server) SMSPhoneNumbers(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	
-	log.Infof("Retrieved %d phone numbers for region %s", len(phoneNumbers), req.Region)
+	log.Infof("Phone numbers retrieved successfully")
+	
+	// Ensure we always return an empty array instead of nil
+	if phoneNumbers == nil {
+		phoneNumbers = []string{}
+	}
 	
 	JSONResponse(w, PhoneNumbersResponse{
 		Success:      true,

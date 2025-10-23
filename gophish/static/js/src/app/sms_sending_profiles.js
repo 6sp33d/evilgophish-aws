@@ -23,11 +23,15 @@ function fetchPhoneNumbers() {
     })
     .success(function(response) {
         $("#phone_loading").hide()
-        if (response.success && response.phone_numbers) {
+        if (response.success && response.phone_numbers && Array.isArray(response.phone_numbers)) {
             var options = '<option value="">Select Phone Number</option>'
-            response.phone_numbers.forEach(function(phoneNumber) {
-                options += '<option value="' + phoneNumber + '">' + phoneNumber + '</option>'
-            })
+            if (response.phone_numbers.length > 0) {
+                response.phone_numbers.forEach(function(phoneNumber) {
+                    options += '<option value="' + phoneNumber + '">' + phoneNumber + '</option>'
+                })
+            } else {
+                options = '<option value="">No active phone numbers found</option>'
+            }
             $("#sms_from").html(options)
             $("#sms_from").prop('disabled', false)
         } else {
