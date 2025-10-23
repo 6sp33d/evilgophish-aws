@@ -160,16 +160,32 @@ func (as *Server) SMSPhoneNumbers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create SNS client
-	_ = sns.NewFromConfig(cfg)
+	snsClient := sns.NewFromConfig(cfg)
 
 	// List phone numbers using the SNS service
-	// Note: We'll use the SNS service to get phone numbers as it's the standard way
-	// The actual End User Messaging service might be different, but SNS is commonly used for SMS
-	_ = context.Background()
+	ctx := context.Background()
 	
-	// For testing purposes, let's return the expected phone numbers
-	// In a real implementation, you would query the actual AWS service
-	phoneNumbers := []string{"+12314124396", "+19034032163"}
+	// Query AWS SNS for origination numbers (phone numbers)
+	var phoneNumbers []string
+	
+	// Use ListOriginationNumbers to get all phone numbers
+	input := &sns.ListOriginationNumbersInput{}
+	
+	paginator := sns.NewListOriginationNumbersPaginator(snsClient, input)
+	for paginator.HasMorePages() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			log.Errorf("Failed to list origination numbers: %v", err)
+			JSONResponse(w, PhoneNumbersResponse{Success: false, Message: "Failed to retrieve phone numbers from AWS"}, http.StatusInternalServerError)
+			return
+		}
+		
+		for _, phoneNumberInfo := range page.PhoneNumbers {
+			if phoneNumberInfo.PhoneNumber != nil {
+				phoneNumbers = append(phoneNumbers, *phoneNumberInfo.PhoneNumber)
+			}
+		}
+	}
 	
 	log.Infof("Retrieved %d phone numbers for region %s", len(phoneNumbers), req.Region)
 	
