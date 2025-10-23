@@ -130,7 +130,7 @@ func (as *Server) SMSPhoneNumbers(w http.ResponseWriter, r *http.Request) {
 
 	// Validate required fields
 	if req.AccessKeyID == "" || req.SecretKey == "" || req.Region == "" {
-		log.Errorf("Missing required fields for phone number request")
+		log.Errorf("Missing required fields for phone numbers request")
 		JSONResponse(w, PhoneNumbersResponse{Success: false, Message: "Missing required fields"}, http.StatusBadRequest)
 		return
 	}
@@ -168,19 +168,13 @@ func (as *Server) SMSPhoneNumbers(w http.ResponseWriter, r *http.Request) {
 		}
 		
 		for _, phoneNumberInfo := range page.PhoneNumbers {
-			// Only include phone numbers that are active (not pending)
-			if phoneNumberInfo.PhoneNumber != nil && phoneNumberInfo.Status != nil && *phoneNumberInfo.Status == "Verified" {
+			if phoneNumberInfo.PhoneNumber != nil {
 				phoneNumbers = append(phoneNumbers, *phoneNumberInfo.PhoneNumber)
 			}
 		}
 	}
 	
 	log.Infof("Phone numbers retrieved successfully")
-	
-	// Ensure we always return an empty array instead of nil
-	if phoneNumbers == nil {
-		phoneNumbers = []string{}
-	}
 	
 	JSONResponse(w, PhoneNumbersResponse{
 		Success:      true,
