@@ -181,7 +181,8 @@ func (as *Server) SMSPhoneNumbers(w http.ResponseWriter, r *http.Request) {
 		}
 		
 		for _, phoneNumberInfo := range page.PhoneNumbers {
-			if phoneNumberInfo.PhoneNumber != nil {
+			// Only include phone numbers that are active (not pending)
+			if phoneNumberInfo.PhoneNumber != nil && phoneNumberInfo.Status != nil && *phoneNumberInfo.Status == "Verified" {
 				phoneNumbers = append(phoneNumbers, *phoneNumberInfo.PhoneNumber)
 			}
 		}

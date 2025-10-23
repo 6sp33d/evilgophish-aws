@@ -1,0 +1,18 @@
+# Build artifacts
+gophish/gophish
+gophish/gophish.exe
+
+# Database files
+gophish/gophish.db
+gophish/gophish.db-journal
+
+# Go build cache
+gophish/vendor/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
