@@ -1,28 +1,36 @@
-# Build artifacts
+# Compiled binaries
 gophish/gophish
 gophish/gophish.exe
-gophish/gophish.db
-gophish/*.db
+gophish/gophish.darwin
+gophish/gophish.linux
+gophish/gophish.windows
 
-# SSL certificates
+# Database files
+gophish/*.db
+gophish/gophish.db
+gophish/*.sqlite
+gophish/*.sqlite3
+
+# SSL certificates and keys
 gophish/*.crt
 gophish/*.key
+gophish/*.pem
 
-# Frontend build outputs
+# Node modules and build artifacts
+gophish/node_modules/
 gophish/static/css/dist/
 gophish/static/js/dist/
 
 # Go build cache
 go-build/
-
-# Node modules
-gophish/node_modules/
+go-cache/
 
 # IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
 # OS files
 .DS_Store
@@ -30,6 +38,7 @@ Thumbs.db
 
 # Log files
 *.log
+logs/
 
 # Temporary files
 *.tmp
