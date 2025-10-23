@@ -1,92 +1,36 @@
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-gophish
-gophish.exe
+# Build artifacts
+gophish/gophish
+gophish/gophish.exe
+gophish/gophish.db
+gophish/*.db
 
-# Test binary, built with `go test -c`
-*.test
+# SSL certificates
+gophish/*.crt
+gophish/*.key
 
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.out
+# Frontend build outputs
+gophish/static/css/dist/
+gophish/static/js/dist/
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
+# Go build cache
+go-build/
 
-# Go workspace file
-go.work
+# Node modules
+gophish/node_modules/
 
 # IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
 
-# OS generated files
+# OS files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
-
-# Database files
-*.db
-*.sqlite
-*.sqlite3
-gophish.db
 
 # Log files
 *.log
-logs/
 
 # Temporary files
 *.tmp
 *.temp
-/tmp/
-
-# Node.js dependencies
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Build artifacts
-dist/
-build/
-static/dist/
-
-# Environment files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# SSL certificates
-*.crt
-*.key
-*.pem
-
-# Backup files
-*.bak
-*.backup
-
-# Cache directories
-.cache/
-go-build/
-
-# Test coverage
-coverage.out
-coverage.html
-
-# Air live reload
-tmp/
-
-# Local configuration overrides
-config.local.json
