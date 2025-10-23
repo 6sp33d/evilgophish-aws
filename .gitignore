@@ -11,11 +11,6 @@ gophish/gophish.db
 gophish/*.sqlite
 gophish/*.sqlite3
 
-# SSL certificates and keys
-gophish/*.crt
-gophish/*.key
-gophish/*.pem
-
 # Node modules and build artifacts
 gophish/node_modules/
 gophish/static/css/dist/
