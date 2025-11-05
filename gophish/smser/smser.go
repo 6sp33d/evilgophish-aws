@@ -4,12 +4,12 @@ import (
 	"context"
 
 	log "github.com/gophish/gophish/logger"
-	"github.com/aws/aws-sdk-go-v2/service/sns"
+    "github.com/aws/aws-sdk-go-v2/service/smsvoicev2"
 )
 
 type SNSMessage struct {
-	Client *sns.Client
-	Params sns.PublishInput
+    Client *smsvoicev2.Client
+    Params smsvoicev2.SendTextMessageInput
 }
 
 // Smser is an interface that defines an object used to queue and
@@ -82,15 +82,15 @@ func sendSms(ctx context.Context, sms []Sms) {
 			s.Error(err)
 			continue
 		}
-		log.Infof("Message generated successfully, about to publish to SNS")
-		// Send the message
-		result, err := message.Client.Publish(ctx, &message.Params)
+        log.Infof("Message generated successfully, about to send via SMSVoiceV2")
+        // Send the message
+        result, err := message.Client.SendTextMessage(ctx, &message.Params)
 		if err != nil {
-			log.Warnf("Error publishing to SNS: %v", err)
+            log.Warnf("Error sending SMS via SMSVoiceV2: %v", err)
 			s.Backoff(err)
 			continue
 		}
-		log.Infof("SMS sent successfully to AWS SNS, MessageId: %v", result.MessageId)
+        log.Infof("SMS sent successfully via AWS SMSVoiceV2, MessageId: %v", result.MessageId)
 		s.Success()
 	}
 	log.Info("sendSms completed")

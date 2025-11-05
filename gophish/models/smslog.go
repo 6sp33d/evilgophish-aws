@@ -11,7 +11,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/aws/aws-sdk-go-v2/service/sns"
+	"github.com/aws/aws-sdk-go-v2/service/smsvoicev2"
+	"github.com/aws/aws-sdk-go-v2/service/smsvoicev2/types"
 )
 
 // SmsLog is a struct that holds information about an sms that is to be
@@ -159,7 +160,7 @@ func (s *SmsLog) Generate(msg *smser.SNSMessage) error {
 			log.Warn(err)
 		}
 
-		// Create AWS SNS client
+    	// Create AWS SMSVoiceV2 client
 		cfg, err := config.LoadDefaultConfig(context.Background(),
 			config.WithRegion(c.SMS.AWSRegion),
 			config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(c.SMS.AWSAccessKeyId, c.SMS.AWSSecretKey, "")),
@@ -168,9 +169,9 @@ func (s *SmsLog) Generate(msg *smser.SNSMessage) error {
 			return fmt.Errorf("failed to load AWS config: %v", err)
 		}
 
-		msg.Client = sns.NewFromConfig(cfg)
+		msg.Client = smsvoicev2.NewFromConfig(cfg)
 		
-		// Format phone number for AWS SNS (E.164 format)
+		// Format phone number (E.164 format)
 		phoneNumber := s.Target
 		if len(phoneNumber) == 10 && phoneNumber[0] != '+' {
 			// Assume US number if 10 digits without country code
@@ -182,9 +183,11 @@ func (s *SmsLog) Generate(msg *smser.SNSMessage) error {
 		
 		log.Infof("Sending SMS to phone number: %s (formatted from: %s)", phoneNumber, s.Target)
 		
-		msg.Params = sns.PublishInput{
-			Message:     aws.String(text),
-			PhoneNumber: aws.String(phoneNumber),
+		msg.Params = smsvoicev2.SendTextMessageInput{
+			MessageBody:            aws.String(text),
+			DestinationPhoneNumber: aws.String(phoneNumber),
+			OriginationPhoneNumber: aws.String(c.SMS.SMSFrom),
+			MessageType:            types.MessageTypePromotional,
 		}
 	} else {
 		return fmt.Errorf("No text template specified")
