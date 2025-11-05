@@ -186,7 +186,7 @@ func (s *SmsLog) Generate(msg *smser.SNSMessage) error {
 		msg.Params = pinpointsmsvoicev2.SendTextMessageInput{
 			MessageBody:            aws.String(text),
 			DestinationPhoneNumber: aws.String(phoneNumber),
-			OriginationPhoneNumber: aws.String(c.SMS.SMSFrom),
+			OriginationIdentity:    aws.String(c.SMS.SMSFrom),
 			MessageType:            types.MessageTypePromotional,
 		}
 	} else {
