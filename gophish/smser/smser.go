@@ -4,12 +4,12 @@ import (
 	"context"
 
 	log "github.com/gophish/gophish/logger"
-    "github.com/aws/aws-sdk-go-v2/service/smsvoicev2"
+    "github.com/aws/aws-sdk-go-v2/service/pinpointsmsvoicev2"
 )
 
 type SNSMessage struct {
-    Client *smsvoicev2.Client
-    Params smsvoicev2.SendTextMessageInput
+    Client *pinpointsmsvoicev2.Client
+    Params pinpointsmsvoicev2.SendTextMessageInput
 }
 
 // Smser is an interface that defines an object used to queue and

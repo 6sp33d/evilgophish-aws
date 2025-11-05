@@ -11,8 +11,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/aws/aws-sdk-go-v2/service/smsvoicev2"
-	"github.com/aws/aws-sdk-go-v2/service/smsvoicev2/types"
+	"github.com/aws/aws-sdk-go-v2/service/pinpointsmsvoicev2"
+	"github.com/aws/aws-sdk-go-v2/service/pinpointsmsvoicev2/types"
 )
 
 // SmsLog is a struct that holds information about an sms that is to be
@@ -169,7 +169,7 @@ func (s *SmsLog) Generate(msg *smser.SNSMessage) error {
 			return fmt.Errorf("failed to load AWS config: %v", err)
 		}
 
-		msg.Client = smsvoicev2.NewFromConfig(cfg)
+		msg.Client = pinpointsmsvoicev2.NewFromConfig(cfg)
 		
 		// Format phone number (E.164 format)
 		phoneNumber := s.Target
@@ -183,7 +183,7 @@ func (s *SmsLog) Generate(msg *smser.SNSMessage) error {
 		
 		log.Infof("Sending SMS to phone number: %s (formatted from: %s)", phoneNumber, s.Target)
 		
-		msg.Params = smsvoicev2.SendTextMessageInput{
+		msg.Params = pinpointsmsvoicev2.SendTextMessageInput{
 			MessageBody:            aws.String(text),
 			DestinationPhoneNumber: aws.String(phoneNumber),
 			OriginationPhoneNumber: aws.String(c.SMS.SMSFrom),
